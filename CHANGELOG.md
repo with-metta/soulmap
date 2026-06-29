@@ -30,5 +30,5 @@ First working build: all four screens, both AI features, local persistence.
   (REQ-P1).
 - Project docs: REQUIREMENTS, DECISIONS (ADR-001–004), this changelog.
 
-[Unreleased]: https://example.com/compare/v0.1.0...HEAD
-[0.1.0]: https://example.com/releases/v0.1.0
+[Unreleased]: https://github.com/with-metta/soulmap/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/with-metta/soulmap/releases/tag/v0.1.0
