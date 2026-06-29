@@ -1,0 +1,163 @@
+"use client";
+
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
+import { MOODS, PROMPTS } from "@/lib/content";
+import type { AIReflection, MoodId, PromptCategory } from "@/lib/types";
+import { newId, saveEntry } from "@/lib/db";
+import { Button } from "@/components/Button";
+
+function JournalScreen() {
+  const params = useSearchParams();
+  const initialCategory = (params.get("prompt") as PromptCategory) || "avoidance";
+  const initialIndex = Math.max(
+    0,
+    PROMPTS.findIndex((p) => p.category === initialCategory),
+  );
+
+  const [promptIndex, setPromptIndex] = useState(initialIndex);
+  const [mood, setMood] = useState<MoodId | null>(null);
+  const [body, setBody] = useState("");
+  const [reflection, setReflection] = useState<AIReflection | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  const prompt = PROMPTS[promptIndex];
+  const wordCount = body.trim() ? body.trim().split(/\s+/).length : 0;
+
+  function selectPrompt(i: number) {
+    setPromptIndex(i);
+    // A new prompt starts a fresh reflection context.
+    setReflection(null);
+    setSaved(false);
+  }
+
+  async function getReflection() {
+    setLoading(true);
+    setError(null);
+    try {
+      const res = await fetch("/api/reflect", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: prompt.text, entry: body }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Something went wrong.");
+
+      const ai = data as AIReflection;
+      setReflection(ai);
+
+      await saveEntry({
+        id: newId(),
+        createdAt: Date.now(),
+        mood,
+        promptCategory: prompt.category,
+        promptText: prompt.text,
+        body,
+        reflection: ai,
+      });
+      setSaved(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="space-y-8">
+      <div>
+        <p className="label">Journal</p>
+        <h1 className="heading text-3xl">A space to listen to yourself</h1>
+      </div>
+
+      {/* Mood check-in */}
+      <section className="space-y-3">
+        <p className="label">How are you arriving?</p>
+        <div className="flex flex-wrap gap-2">
+          {MOODS.map((m) => (
+            <button
+              key={m.id}
+              onClick={() => setMood(mood === m.id ? null : m.id)}
+              className={`rounded-full border px-4 py-1.5 text-sm transition-colors ${
+                mood === m.id
+                  ? "border-sage bg-sage text-white"
+                  : "border-black/15 text-ink-soft hover:bg-black/4"
+              }`}
+            >
+              {m.label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* Prompt picker */}
+      <section className="space-y-3">
+        <p className="label">Choose a prompt</p>
+        <div className="flex flex-wrap gap-2">
+          {PROMPTS.map((p, i) => (
+            <button
+              key={p.category}
+              onClick={() => selectPrompt(i)}
+              className={`rounded-full px-3 py-1.5 text-sm transition-colors ${
+                i === promptIndex
+                  ? "bg-warm text-white"
+                  : "bg-warm-light text-warm-dark hover:opacity-80"
+              }`}
+            >
+              {p.label}
+            </button>
+          ))}
+        </div>
+        <div className="panel-accent rounded-r-lg p-4">
+          <p className="heading text-lg leading-snug">{prompt.text}</p>
+        </div>
+      </section>
+
+      {/* Writing space */}
+      <section className="space-y-2">
+        <textarea
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="Write freely. No one is reading over your shoulder."
+          rows={10}
+          className="card w-full resize-y p-4 font-serif text-base leading-relaxed text-ink outline-none focus:border-sage"
+        />
+        <div className="flex items-center justify-between">
+          <span className="label">{wordCount} words</span>
+          <Button onClick={getReflection} disabled={loading || wordCount === 0}>
+            {loading ? "Reflecting…" : "Get reflection"}
+          </Button>
+        </div>
+      </section>
+
+      {error && (
+        <p className="rounded-lg bg-warm-light px-4 py-3 text-sm text-warm-dark">
+          {error}
+        </p>
+      )}
+
+      {reflection && (
+        <section className="panel-accent space-y-3 rounded-r-lg p-5">
+          <p className="label">A reflection</p>
+          <p className="font-serif text-lg leading-relaxed text-sage-dark">
+            {reflection.reflection}
+          </p>
+          <p className="font-serif text-lg italic leading-relaxed text-ink">
+            {reflection.question}
+          </p>
+          {saved && <p className="label">Saved to your journal</p>}
+        </section>
+      )}
+    </div>
+  );
+}
+
+export default function JournalPage() {
+  return (
+    <Suspense fallback={null}>
+      <JournalScreen />
+    </Suspense>
+  );
+}
