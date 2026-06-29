@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ClerkProvider } from "@clerk/nextjs";
 import "./globals.css";
 import { Nav } from "@/components/Nav";
 
@@ -12,11 +13,13 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className="h-full">
-      <body className="min-h-full bg-cream text-ink">
-        <Nav />
-        <main className="mx-auto w-full max-w-3xl px-5 py-8">{children}</main>
-      </body>
-    </html>
+    <ClerkProvider>
+      <html lang="en" className="h-full">
+        <body className="min-h-full bg-cream text-ink">
+          <Nav />
+          <main className="mx-auto w-full max-w-3xl px-5 py-8">{children}</main>
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { UserButton, SignInButton, useUser } from "@clerk/nextjs";
 import { getStreak } from "@/lib/db";
 
 const TABS = [
@@ -15,6 +16,7 @@ const TABS = [
 export function Nav() {
   const pathname = usePathname();
   const [streak, setStreak] = useState<number | null>(null);
+  const { isSignedIn } = useUser();
 
   useEffect(() => {
     // Recompute on every navigation so a fresh entry updates the counter.
@@ -51,14 +53,25 @@ export function Nav() {
             );
           })}
         </div>
-        {streak !== null && streak > 0 && (
-          <span
-            className="rounded-full bg-warm-light px-3 py-1 text-sm text-warm-dark"
-            title="Consecutive days journaling"
-          >
-            🔥 {streak}-day streak
-          </span>
-        )}
+        <div className="flex items-center gap-3">
+          {streak !== null && streak > 0 && (
+            <span
+              className="rounded-full bg-warm-light px-3 py-1 text-sm text-warm-dark"
+              title="Consecutive days journaling"
+            >
+              🔥 {streak}-day streak
+            </span>
+          )}
+          {isSignedIn ? (
+            <UserButton />
+          ) : (
+            <SignInButton mode="modal">
+              <button className="rounded-lg px-3 py-1.5 text-sm text-ink-soft hover:bg-black/4 transition-colors">
+                Sign in
+              </button>
+            </SignInButton>
+          )}
+        </div>
       </nav>
     </header>
   );
