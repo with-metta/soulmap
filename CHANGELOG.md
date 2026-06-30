@@ -15,6 +15,14 @@ IDs from `docs/REQUIREMENTS.md`.
   themes" (shown when ≥ 3 entries exist) replaces them with AI-generated theme
   pills. Loading, success, and error states are all handled.
 - `THEMES_SYSTEM_PROMPT` added to `lib/ai/prompts.ts`.
+- **Ikigai mapper** (`/ikigai`): four-field 2×2 grid (love / good at / world
+  needs / paid for), Clerk-gated "Find my Ikigai" button, Claude plain-text
+  analysis via `/api/ikigai`, and local-first IndexedDB persistence with
+  pre-fill on return visits (REQ-N2).
+- Nav tab "Ikigai" inserted between Values and Insights.
+- `IkigaiEntry` type in `lib/types.ts`; `ikigai` IndexedDB store (DB v2 with
+  versioned upgrade callback); `saveIkigai` / `getLatestIkigai` in `lib/db.ts`.
+- `IKIGAI_SYSTEM_PROMPT` in `lib/ai/prompts.ts`.
 
 ## [0.1.0] — 2026-06-29
 
