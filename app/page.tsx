@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useUser, SignInButton } from "@clerk/nextjs";
 import { PROMPTS } from "@/lib/content";
 import { getRecentEntries } from "@/lib/db";
 import type { JournalEntry } from "@/lib/types";
@@ -19,13 +20,97 @@ const PILLARS = [
   { href: "/insights", title: "Insights", blurb: "Patterns and themes from your writing." },
 ];
 
-export default function HomePage() {
+const FEATURES = [
+  {
+    title: "Quiet Reflection",
+    blurb:
+      "Journal your thoughts with a gentle AI mirror that asks the right questions, never judges.",
+  },
+  {
+    title: "Know Your Values",
+    blurb:
+      "Discover what truly matters to you with a guided values survey and a personal profile.",
+  },
+  {
+    title: "See Your Patterns",
+    blurb:
+      "Insights surface themes across your entries so you understand yourself a little better each week.",
+  },
+];
+
+function LandingView() {
+  return (
+    <div className="space-y-14 py-4">
+      {/* Hero */}
+      <section className="space-y-4 text-center">
+        <h1 className="heading font-serif text-4xl leading-snug text-ink sm:text-5xl">
+          Looking for meaning in life?<br />
+          Know yourself a little more?<br />
+          Or find out what&apos;s next?
+        </h1>
+        <p className="font-serif text-xl text-sage-dark">
+          Look no more; I promise the best of you!
+        </p>
+        <div className="pt-2">
+          <SignInButton mode="modal">
+            <button className="rounded-lg bg-sage px-6 py-3 text-base font-medium text-white hover:bg-sage-dark transition-colors">
+              Start your journey
+            </button>
+          </SignInButton>
+        </div>
+      </section>
+
+      {/* YouTube embed */}
+      <section className="relative aspect-video w-full overflow-hidden rounded-xl">
+        <iframe
+          src="https://www.youtube.com/embed/h_L4Rixya64"
+          title="SoulMap introduction"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowFullScreen
+          className="absolute inset-0 h-full w-full"
+        />
+      </section>
+
+      {/* Features */}
+      <section className="space-y-4">
+        <p className="label text-center">What you&apos;ll find here</p>
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          {FEATURES.map((f) => (
+            <div key={f.title} className="card p-5">
+              <p className="heading text-lg">{f.title}</p>
+              <p className="mt-2 text-sm text-ink-soft">{f.blurb}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* Bottom CTA */}
+      <section className="text-center">
+        <SignInButton mode="modal">
+          <button className="rounded-lg bg-sage px-6 py-3 text-base font-medium text-white hover:bg-sage-dark transition-colors">
+            Start your journey
+          </button>
+        </SignInButton>
+      </section>
+    </div>
+  );
+}
+
+function DashboardView() {
   const prompt = dailyPrompt();
+  const { isSignedIn } = useUser();
   const [recent, setRecent] = useState<JournalEntry[] | null>(null);
 
   useEffect(() => {
-    getRecentEntries(3).then(setRecent).catch(() => setRecent([]));
-  }, []);
+    if (isSignedIn) {
+      fetch("/api/entries")
+        .then((r) => r.json())
+        .then((d) => setRecent((d.entries as JournalEntry[]).slice(0, 3)))
+        .catch(() => getRecentEntries(3).then(setRecent));
+    } else {
+      getRecentEntries(3).then(setRecent).catch(() => setRecent([]));
+    }
+  }, [isSignedIn]);
 
   return (
     <div className="space-y-10">
@@ -89,4 +174,11 @@ export default function HomePage() {
       </section>
     </div>
   );
+}
+
+export default function HomePage() {
+  const { isSignedIn, isLoaded } = useUser();
+
+  if (!isLoaded) return null;
+  return isSignedIn ? <DashboardView /> : <LandingView />;
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useUser, SignInButton } from "@clerk/nextjs";
 import {
   MAX_VALUE_SELECTION,
   MIN_VALUE_SELECTION,
@@ -11,6 +12,7 @@ import { newId, saveProfile } from "@/lib/db";
 import { Button } from "@/components/Button";
 
 export default function ValuesPage() {
+  const { isSignedIn, isLoaded } = useUser();
   const [selected, setSelected] = useState<string[]>([]);
   const [profile, setProfile] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
@@ -22,7 +24,7 @@ export default function ValuesPage() {
     setProfile(null);
     setSelected((prev) => {
       if (prev.includes(id)) return prev.filter((v) => v !== id);
-      if (prev.length >= MAX_VALUE_SELECTION) return prev; // cap at 7
+      if (prev.length >= MAX_VALUE_SELECTION) return prev;
       return [...prev, id];
     });
   }
@@ -41,12 +43,23 @@ export default function ValuesPage() {
       if (!res.ok) throw new Error(data.error ?? "Something went wrong.");
 
       setProfile(data.profile);
-      await saveProfile({
+
+      const record = {
         id: newId(),
         createdAt: Date.now(),
         valueIds: [...selected],
         profileText: data.profile,
-      });
+      };
+
+      // Local IndexedDB save (offline fallback).
+      await saveProfile(record);
+
+      // Cloud save (fire-and-forget).
+      fetch("/api/user-values", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record),
+      }).catch(() => {});
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
     } finally {
@@ -76,9 +89,7 @@ export default function ValuesPage() {
                 isOn ? "border-warm bg-warm-light" : "hover:border-black/20"
               }`}
             >
-              <p
-                className={`font-medium ${isOn ? "text-warm-dark" : "text-ink"}`}
-              >
+              <p className={`font-medium ${isOn ? "text-warm-dark" : "text-ink"}`}>
                 {v.name}
               </p>
               <p className="text-sm text-ink-muted">{v.description}</p>
@@ -87,18 +98,32 @@ export default function ValuesPage() {
         })}
       </div>
 
-      <div className="flex items-center justify-between">
-        <span className="label">
-          {selected.length} / {MAX_VALUE_SELECTION} chosen
-        </span>
-        <Button onClick={generate} disabled={!canSubmit || loading}>
-          {loading
-            ? "Reading your values…"
-            : canSubmit
-              ? "See my values profile"
-              : `Choose ${MIN_VALUE_SELECTION - selected.length} more`}
-        </Button>
-      </div>
+      {/* Action area — gated behind sign-in */}
+      {isLoaded && !isSignedIn ? (
+        <div className="card space-y-3 p-6 text-center">
+          <p className="text-ink-soft">
+            Sign in to generate and save your values profile.
+          </p>
+          <SignInButton mode="modal">
+            <button className="rounded-lg bg-sage px-5 py-2.5 text-sm font-medium text-white hover:bg-sage-dark transition-colors">
+              Sign in to continue
+            </button>
+          </SignInButton>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between">
+          <span className="label">
+            {selected.length} / {MAX_VALUE_SELECTION} chosen
+          </span>
+          <Button onClick={generate} disabled={!canSubmit || loading}>
+            {loading
+              ? "Reading your values…"
+              : canSubmit
+                ? "See my values profile"
+                : `Choose ${MIN_VALUE_SELECTION - selected.length} more`}
+          </Button>
+        </div>
+      )}
 
       {error && (
         <p className="rounded-lg bg-warm-light px-4 py-3 text-sm text-warm-dark">

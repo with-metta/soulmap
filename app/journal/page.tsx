@@ -2,6 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { useUser, SignInButton } from "@clerk/nextjs";
 import { MOODS, PROMPTS } from "@/lib/content";
 import type { AIReflection, MoodId, PromptCategory } from "@/lib/types";
 import { newId, saveEntry } from "@/lib/db";
@@ -14,6 +15,8 @@ function JournalScreen() {
     0,
     PROMPTS.findIndex((p) => p.category === initialCategory),
   );
+
+  const { isSignedIn, isLoaded } = useUser();
 
   const [promptIndex, setPromptIndex] = useState(initialIndex);
   const [mood, setMood] = useState<MoodId | null>(null);
@@ -28,7 +31,6 @@ function JournalScreen() {
 
   function selectPrompt(i: number) {
     setPromptIndex(i);
-    // A new prompt starts a fresh reflection context.
     setReflection(null);
     setSaved(false);
   }
@@ -48,7 +50,7 @@ function JournalScreen() {
       const ai = data as AIReflection;
       setReflection(ai);
 
-      await saveEntry({
+      const entry = {
         id: newId(),
         createdAt: Date.now(),
         mood,
@@ -56,7 +58,18 @@ function JournalScreen() {
         promptText: prompt.text,
         body,
         reflection: ai,
-      });
+      };
+
+      // Local IndexedDB save (offline fallback).
+      await saveEntry(entry);
+
+      // Cloud save (fire-and-forget).
+      fetch("/api/entries", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entry),
+      }).catch(() => {});
+
       setSaved(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong.");
@@ -115,22 +128,35 @@ function JournalScreen() {
         </div>
       </section>
 
-      {/* Writing space */}
-      <section className="space-y-2">
-        <textarea
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="Write freely. No one is reading over your shoulder."
-          rows={10}
-          className="card w-full resize-y p-4 font-serif text-base leading-relaxed text-ink outline-none focus:border-sage"
-        />
-        <div className="flex items-center justify-between">
-          <span className="label">{wordCount} words</span>
-          <Button onClick={getReflection} disabled={loading || wordCount === 0}>
-            {loading ? "Reflecting…" : "Get reflection"}
-          </Button>
-        </div>
-      </section>
+      {/* Writing space — gated behind sign-in */}
+      {isLoaded && !isSignedIn ? (
+        <section className="card space-y-3 p-6 text-center">
+          <p className="text-ink-soft">
+            Sign in to save your reflections and build your journal.
+          </p>
+          <SignInButton mode="modal">
+            <button className="rounded-lg bg-sage px-5 py-2.5 text-sm font-medium text-white hover:bg-sage-dark transition-colors">
+              Sign in to continue
+            </button>
+          </SignInButton>
+        </section>
+      ) : (
+        <section className="space-y-2">
+          <textarea
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Write freely. No one is reading over your shoulder."
+            rows={10}
+            className="card w-full resize-y p-4 font-serif text-base leading-relaxed text-ink outline-none focus:border-sage"
+          />
+          <div className="flex items-center justify-between">
+            <span className="label">{wordCount} words</span>
+            <Button onClick={getReflection} disabled={loading || wordCount === 0}>
+              {loading ? "Reflecting…" : "Get reflection"}
+            </Button>
+          </div>
+        </section>
+      )}
 
       {error && (
         <p className="rounded-lg bg-warm-light px-4 py-3 text-sm text-warm-dark">
