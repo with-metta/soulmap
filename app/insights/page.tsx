@@ -64,6 +64,7 @@ export default function InsightsPage() {
 
   // POST to /api/themes and update AI theme state (REQ-N8).
   async function handleUncoverThemes() {
+    if (!entries) return;
     setThemesLoading(true);
     setThemesError(null);
     try {
@@ -71,7 +72,7 @@ export default function InsightsPage() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          entries: entries!.map((e) => ({
+          entries: entries.map((e) => ({
             body: e.body,
             promptCategory: e.promptCategory,
             createdAt: e.createdAt,
@@ -138,12 +139,13 @@ export default function InsightsPage() {
             {themesError && (
               <p className="text-sm text-warm-dark">{themesError}</p>
             )}
-            {entries.length >= 3 && (
+            {entries && entries.length >= 3 && (
               <button
                 onClick={handleUncoverThemes}
-                className="mt-1 text-sm text-sage-dark underline underline-offset-2"
+                disabled={themesLoading}
+                className="mt-1 text-sm text-sage-dark underline underline-offset-2 disabled:opacity-50"
               >
-                Uncover deeper themes
+                {themesLoading ? "Looking deeper…" : "Uncover deeper themes"}
               </button>
             )}
           </>
