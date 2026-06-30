@@ -7,6 +7,15 @@ IDs from `docs/REQUIREMENTS.md`.
 
 ## [Unreleased]
 
+### Added
+- **AI-extracted recurring themes** (REQ-N8): new `POST /api/themes` route uses
+  Claude structured output (`messages.parse` + Zod) to extract 3–6 specific,
+  emotionally resonant themes from journal entries. On the Insights screen the
+  heuristic category pills remain visible by default; clicking "Uncover deeper
+  themes" (shown when ≥ 3 entries exist) replaces them with AI-generated theme
+  pills. Loading, success, and error states are all handled.
+- `THEMES_SYSTEM_PROMPT` added to `lib/ai/prompts.ts`.
+
 ## [0.1.0] — 2026-06-29
 
 First working build: all four screens, both AI features, local persistence.

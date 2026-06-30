@@ -24,6 +24,12 @@ const TAG_COLORS = [
 
 export default function InsightsPage() {
   const [entries, setEntries] = useState<JournalEntry[] | null>(null);
+  // null = not yet fetched; populated after a successful AI call (REQ-N8).
+  const [aiThemes, setAiThemes] = useState<
+    { label: string; count: number }[] | null
+  >(null);
+  const [themesLoading, setThemesLoading] = useState(false);
+  const [themesError, setThemesError] = useState<string | null>(null);
 
   useEffect(() => {
     getEntries().then(setEntries).catch(() => setEntries([]));
@@ -49,11 +55,45 @@ export default function InsightsPage() {
     );
   }
 
+  // Heuristic themes still drive the suggested-categories section below.
   const themes = themeCounts(entries);
   const days = moodByWeekday(entries);
   const maxDay = Math.max(...days, 1);
   const observation = patternObservation(entries);
   const suggestions = suggestedCategories(entries);
+
+  // POST to /api/themes and update AI theme state (REQ-N8).
+  async function handleUncoverThemes() {
+    if (!entries) return;
+    setThemesLoading(true);
+    setThemesError(null);
+    try {
+      const res = await fetch("/api/themes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entries: entries.map((e) => ({
+            body: e.body,
+            promptCategory: e.promptCategory,
+            createdAt: e.createdAt,
+          })),
+        }),
+      });
+      const data = (await res.json()) as {
+        themes?: { label: string; count: number }[];
+        error?: string;
+      };
+      if (!res.ok) {
+        setThemesError(data.error ?? "Something went wrong. Try again.");
+      } else {
+        setAiThemes(data.themes ?? null);
+      }
+    } catch {
+      setThemesError("Could not reach the server. Try again.");
+    } finally {
+      setThemesLoading(false);
+    }
+  }
 
   return (
     <div className="space-y-10">
@@ -62,21 +102,54 @@ export default function InsightsPage() {
         <h1 className="heading text-3xl">What your writing reveals</h1>
       </div>
 
-      {/* Recurring themes */}
+      {/* Recurring themes (REQ-I1 / REQ-N8) */}
       <section className="space-y-3">
         <p className="label">Recurring themes</p>
-        <div className="flex flex-wrap gap-2">
-          {themes.map((t, i) => (
-            <span
-              key={t.category}
-              className={`rounded-full px-3 py-1 text-sm capitalize ${
-                TAG_COLORS[i % TAG_COLORS.length]
-              }`}
-            >
-              {t.category} · {t.count}
-            </span>
-          ))}
-        </div>
+        {themesLoading ? (
+          <p className="text-ink-muted">Looking deeper…</p>
+        ) : aiThemes !== null ? (
+          /* Success: AI-extracted themes replace the category pills. */
+          <div className="flex flex-wrap gap-2">
+            {aiThemes.map((t, i) => (
+              <span
+                key={t.label}
+                className={`rounded-full px-3 py-1 text-sm ${
+                  TAG_COLORS[i % TAG_COLORS.length]
+                }`}
+              >
+                {t.label} · {t.count}
+              </span>
+            ))}
+          </div>
+        ) : (
+          /* Default / error: heuristic category pills as small/muted fallback. */
+          <>
+            <div className="flex flex-wrap gap-2">
+              {themes.map((t, i) => (
+                <span
+                  key={t.category}
+                  className={`rounded-full px-3 py-1 text-sm capitalize opacity-70 ${
+                    TAG_COLORS[i % TAG_COLORS.length]
+                  }`}
+                >
+                  {t.category} · {t.count}
+                </span>
+              ))}
+            </div>
+            {themesError && (
+              <p className="text-sm text-warm-dark">{themesError}</p>
+            )}
+            {entries && entries.length >= 3 && (
+              <button
+                onClick={handleUncoverThemes}
+                disabled={themesLoading}
+                className="mt-1 text-sm text-sage-dark underline underline-offset-2 disabled:opacity-50"
+              >
+                {themesLoading ? "Looking deeper…" : "Uncover deeper themes"}
+              </button>
+            )}
+          </>
+        )}
       </section>
 
       {/* Mood / activity by day of week */}
