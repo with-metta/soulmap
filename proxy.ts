@@ -1,7 +1,12 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 
 // Protect AI routes so only authenticated users can trigger Anthropic calls.
-const isProtectedRoute = createRouteMatcher(["/api/reflect(.*)", "/api/values(.*)"]);
+const isProtectedRoute = createRouteMatcher([
+  "/api/reflect(.*)",
+  "/api/values(.*)",
+  "/api/entries(.*)",
+  "/api/user-values(.*)",
+]);
 
 export const proxy = clerkMiddleware(async (auth, req) => {
   if (isProtectedRoute(req)) {
