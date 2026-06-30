@@ -78,13 +78,28 @@ export async function POST(req: Request) {
       ],
     });
 
-    if (!response.parsed_output) {
+    // response.parsed_output should match the Zod schema supplied to the model,
+    // but normalize and return a stable shape so the frontend doesn't depend on
+    // provider-specific wrappers. Also avoid returning raw journal text or
+    // model internals here.
+    const out = (response as any).parsed_output;
+    if (!out || !Array.isArray(out.themes)) {
       return NextResponse.json(
         { error: "The themes could not be extracted. Please try again." },
         { status: 502 },
       );
     }
-    return NextResponse.json(response.parsed_output);
+
+    // Normalize themes: ensure label is string and count is integer.
+    const themes = out.themes.map((t: any) => ({
+      label: String(t.label ?? ""),
+      count: Number.isFinite(Number(t.count)) ? Math.trunc(Number(t.count)) : 0,
+    }));
+
+    // NOTE: Journal content is sensitive. We send only aggregated theme data
+    // back to the client and avoid logging raw entries. Ensure privacy policy
+    // / user consent covers sending entries to the model.
+    return NextResponse.json({ themes });
   } catch (err) {
     return NextResponse.json(errorBody(err), { status: errorStatus(err) });
   }
