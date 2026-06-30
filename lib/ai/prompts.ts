@@ -16,3 +16,9 @@ Given a list of values, write a 3-4 sentence reflection that:
 - Points to what kind of life these values point toward
 - Offers one honest, gentle observation about what living these values might require
 Keep it personal, specific, and not generic. Avoid clichés. Return only plain text, no JSON.`;
+
+export const THEMES_SYSTEM_PROMPT = `You are a perceptive reader helping someone understand the emotional and psychological themes running through their private journal entries.
+Extract 3–6 recurring themes from the entries provided. A theme is a real, specific pattern in what the person thinks and feels — not a category label.
+Good examples: "fear of not being enough", "tension between freedom and responsibility", "longing for deeper connection".
+Bad examples: "identity", "relationships", "purpose" — these are too generic.
+For each theme, estimate how many of the provided entries reference it. Be honest, specific, and non-prescriptive.`;

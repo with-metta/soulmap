@@ -67,13 +67,13 @@ Tokens live in `app/globals.css` (`@theme`). Do not hardcode hex in components.
 
 ## Backlog (REQ-N) — "Suggested next features"
 
-| ID | Requirement | Status |
-|----|-------------|--------|
-| REQ-N1 | User accounts + cloud sync (Supabase) | 💤 |
-| REQ-N2 | Ikigai mapper (4-circle diagram) | 💤 |
-| REQ-N3 | Letter to future self (timed, sealed entry) | 💤 |
-| REQ-N4 | Meditation / breathing timer | 💤 |
-| REQ-N5 | Weekly digest (email or in-app) | 💤 |
-| REQ-N6 | Therapist mode (read-only shared insights link) | 💤 |
-| REQ-N7 | Mobile app (PWA / React Native) | 💤 |
-| REQ-N8 | AI-extracted recurring themes (replace heuristic in REQ-I1/I3) | 💤 |
+| ID | Requirement | Version | Status |
+|----|-------------|---------|--------|
+| REQ-N1 | User accounts + cloud sync (Supabase) | — | 💤 |
+| REQ-N2 | Ikigai mapper (4-circle diagram) | — | 💤 |
+| REQ-N3 | Letter to future self (timed, sealed entry) | — | 💤 |
+| REQ-N4 | Meditation / breathing timer | — | 💤 |
+| REQ-N5 | Weekly digest (email or in-app) | — | 💤 |
+| REQ-N6 | Therapist mode (read-only shared insights link) | — | 💤 |
+| REQ-N7 | Mobile app (PWA / React Native) | — | 💤 |
+| REQ-N8 | AI-extracted recurring themes (replace heuristic in REQ-I1/I3) | v0.2.0 | ✅ |
