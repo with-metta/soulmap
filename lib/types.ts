@@ -58,3 +58,14 @@ export interface ValuesProfile {
   valueIds: string[];
   profileText: string;
 }
+
+/** A saved Ikigai mapping session. */
+export interface IkigaiEntry {
+  id: string;
+  createdAt: number;
+  love: string;
+  goodAt: string;
+  worldNeeds: string;
+  paidFor: string;
+  analysis: string;
+}
