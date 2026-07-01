@@ -1,5 +1,5 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
-import type { JournalEntry, ValuesProfile } from "./types";
+import type { JournalEntry, ValuesProfile, IkigaiEntry } from "./types";
 
 // Local-first persistence (ADR-002). All reads/writes go through this module
 // so the UI never touches IndexedDB directly — a future Supabase backend can
@@ -16,10 +16,15 @@ interface SoulMapDB extends DBSchema {
     value: ValuesProfile;
     indexes: { byCreatedAt: number };
   };
+  ikigai: {
+    key: string;
+    value: IkigaiEntry;
+    indexes: { byCreatedAt: number };
+  };
 }
 
 const DB_NAME = "soulmap";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 let dbPromise: Promise<IDBPDatabase<SoulMapDB>> | null = null;
 
@@ -29,11 +34,17 @@ function getDB(): Promise<IDBPDatabase<SoulMapDB>> {
   }
   if (!dbPromise) {
     dbPromise = openDB<SoulMapDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        const entries = db.createObjectStore("entries", { keyPath: "id" });
-        entries.createIndex("byCreatedAt", "createdAt");
-        const profiles = db.createObjectStore("profiles", { keyPath: "id" });
-        profiles.createIndex("byCreatedAt", "createdAt");
+      upgrade(db, oldVersion) {
+        if (oldVersion < 1) {
+          const entries = db.createObjectStore("entries", { keyPath: "id" });
+          entries.createIndex("byCreatedAt", "createdAt");
+          const profiles = db.createObjectStore("profiles", { keyPath: "id" });
+          profiles.createIndex("byCreatedAt", "createdAt");
+        }
+        if (oldVersion < 2) {
+          const ikigai = db.createObjectStore("ikigai", { keyPath: "id" });
+          ikigai.createIndex("byCreatedAt", "createdAt");
+        }
       },
     });
   }
@@ -76,6 +87,19 @@ export async function saveProfile(profile: ValuesProfile): Promise<void> {
 export async function getLatestProfile(): Promise<ValuesProfile | null> {
   const db = await getDB();
   const all = await db.getAllFromIndex("profiles", "byCreatedAt");
+  return all.length ? all[all.length - 1] : null;
+}
+
+// ── Ikigai entries (REQ-N2) ──────────────────────────────────────────────────
+
+export async function saveIkigai(entry: IkigaiEntry): Promise<void> {
+  const db = await getDB();
+  await db.put("ikigai", entry);
+}
+
+export async function getLatestIkigai(): Promise<IkigaiEntry | null> {
+  const db = await getDB();
+  const all = await db.getAllFromIndex("ikigai", "byCreatedAt");
   return all.length ? all[all.length - 1] : null;
 }
 

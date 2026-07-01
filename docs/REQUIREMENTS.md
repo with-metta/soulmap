@@ -65,12 +65,17 @@ Tokens live in `app/globals.css` (`@theme`). Do not hardcode hex in components.
 |----|-------------|---------|--------|
 | REQ-P1 | Local-first storage of entries + profiles (IndexedDB) | v0.1.0 | ✅ |
 
+## Ikigai (REQ-N2)
+
+| ID | Requirement | Version | Status |
+|----|-------------|---------|--------|
+| REQ-N2 | Ikigai mapper — 4-field input, AI analysis, local persistence | v0.2.0 | ✅ |
+
 ## Backlog (REQ-N) — "Suggested next features"
 
 | ID | Requirement | Version | Status |
 |----|-------------|---------|--------|
 | REQ-N1 | User accounts + cloud sync (Supabase) | — | 💤 |
-| REQ-N2 | Ikigai mapper (4-circle diagram) | — | 💤 |
 | REQ-N3 | Letter to future self (timed, sealed entry) | — | 💤 |
 | REQ-N4 | Meditation / breathing timer | — | 💤 |
 | REQ-N5 | Weekly digest (email or in-app) | — | 💤 |
