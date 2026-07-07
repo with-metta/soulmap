@@ -17,6 +17,7 @@ function dailyPrompt() {
 const PILLARS = [
   { href: "/journal", title: "Journal", blurb: "Quiet reflection with a gentle mirror." },
   { href: "/values", title: "Values", blurb: "Discover what truly matters to you." },
+  { href: "/ikigai", title: "Ikigai", blurb: "Find your reason for being." },
   { href: "/insights", title: "Insights", blurb: "Patterns and themes from your writing." },
 ];
 
@@ -30,6 +31,11 @@ const FEATURES = [
     title: "Know Your Values",
     blurb:
       "Discover what truly matters to you with a guided values survey and a personal profile.",
+  },
+  {
+    title: "Find Your Ikigai",
+    blurb:
+      "Explore the intersection of what you love, what you're good at, what the world needs, and what you can be paid for.",
   },
   {
     title: "See Your Patterns",
