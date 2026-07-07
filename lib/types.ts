@@ -77,3 +77,10 @@ export interface LetterEntry {
   unlockAt: number; // epoch-ms; letter is sealed while Date.now() < unlockAt
   body: string;
 }
+
+/** A completed meditation session. */
+export interface MeditationSession {
+  id: string;
+  createdAt: number;
+  durationSeconds: number;
+}

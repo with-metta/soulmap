@@ -11,6 +11,7 @@ const TABS = [
   { href: "/journal", label: "Journal" },
   { href: "/values", label: "Values" },
   { href: "/letter", label: "Letter" },
+  { href: "/meditation", label: "Meditation" },
   { href: "/ikigai", label: "Ikigai" },
   { href: "/insights", label: "Insights" },
 ];

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Meditation / breathing timer** (REQ-N4): `/meditation` offers preset
+  session lengths (1/3/5/10 min), a box-breathing circle (inhale/hold/exhale/
+  hold, 4s each) driven off a single interval so the countdown and animation
+  never drift, and Start/Pause/Reset controls with a proper effect cleanup so
+  a dangling interval can't outlive a pause or navigation. Stateless utility —
+  no AI, no auth gate, no cloud sync. Completed sessions save locally as
+  `MeditationSession` (`sessions` store, IndexedDB v4) and a running count is
+  shown on the page. Linked from `components/Nav.tsx` and the home page's
+  pillars/features lists (grid bumped to 6 columns).
 - **Accounts + cloud sync** (REQ-N1): Clerk authentication gates content
   creation (journal, values); signed-in users' entries and values profiles
   cloud-sync to Neon Postgres (`lib/db-server.ts`) via `/api/entries` and
