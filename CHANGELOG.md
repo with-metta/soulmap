@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-07-07
+
 - **Weekly digest** (REQ-N5): `weeklyDigest()` in `lib/insights.ts` summarizes
   entry count and top prompt category over the trailing 7 days. Shipped
   in-app only (no email delivery). Shown as a compact "This week" card on the
