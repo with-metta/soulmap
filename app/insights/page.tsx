@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { useUser } from "@clerk/nextjs";
 import { getEntries } from "@/lib/db";
 import { promptByCategory } from "@/lib/content";
 import {
@@ -23,6 +24,7 @@ const TAG_COLORS = [
 ];
 
 export default function InsightsPage() {
+  const { isSignedIn, isLoaded } = useUser();
   const [entries, setEntries] = useState<JournalEntry[] | null>(null);
   // null = not yet fetched; populated after a successful AI call (REQ-N8).
   const [aiThemes, setAiThemes] = useState<
@@ -31,11 +33,25 @@ export default function InsightsPage() {
   const [themesLoading, setThemesLoading] = useState(false);
   const [themesError, setThemesError] = useState<string | null>(null);
 
+  // Cloud-sync entries for signed-in users so Insights reflects all devices
+  // (REQ-N1 / ADR-005), not just this browser's local IndexedDB — same
+  // pattern as the home page's DashboardView (REQ-I1).
   useEffect(() => {
-    getEntries().then(setEntries).catch(() => setEntries([]));
-  }, []);
+    if (!isLoaded) return;
+    if (isSignedIn) {
+      fetch("/api/entries")
+        .then((r) => r.json())
+        .then((d) => {
+          if (!Array.isArray(d.entries)) throw new Error("Unexpected response");
+          setEntries(d.entries as JournalEntry[]);
+        })
+        .catch(() => getEntries().then(setEntries).catch(() => setEntries([])));
+    } else {
+      getEntries().then(setEntries).catch(() => setEntries([]));
+    }
+  }, [isLoaded, isSignedIn]);
 
-  if (entries === null) {
+  if (!isLoaded || entries === null) {
     return <p className="text-ink-muted">Loading…</p>;
   }
 

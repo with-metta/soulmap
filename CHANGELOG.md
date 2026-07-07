@@ -31,11 +31,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   page is reachable from the UI. Added `/api/ikigai(.*)` to the Clerk route
   matcher in `proxy.ts` so the Anthropic-backed endpoint requires
   authentication like `/api/reflect` and `/api/values`.
+- **Fix Insights ignoring cloud-synced entries (REQ-N8)**: `/insights` read
+  only local IndexedDB via `getEntries()`, so a signed-in user whose entries
+  live in Neon (written on another device, or after local storage was
+  cleared) saw a degraded or empty page and never got the "Uncover deeper
+  themes" button. `app/insights/page.tsx` now mirrors the home page's
+  `DashboardView`: signed-in users fetch `/api/entries`, falling back to
+  local `getEntries()` on failure; signed-out users are unchanged. The cloud
+  fetch now also verifies the response shape before using it, so a non-200
+  response with a JSON body (e.g. a stale-session 401) falls back to local
+  entries instead of crashing the page.
 - **Test coverage for `/api/themes`** (REQ-N8): Added Vitest as the project's
   test runner (`vitest.config.ts`, `npm run test`) and mocked unit tests
   covering the happy path and the < 3 entries validation error. Also removed
   the two remaining `any` types in `app/api/themes/route.ts` in favor of a
-  small hand-written type for the model's `parsed_output` shape.
+  small hand-written type for the model's `parsed_output` shape. Scoped
+  Vitest's global types to the test files themselves (explicit `vitest`
+  imports) instead of the project-wide `tsconfig.json`, to avoid
+  inadvertently narrowing automatic `@types/*` inclusion project-wide.
 
 ## [0.1.0] — 2026-06-29
 
