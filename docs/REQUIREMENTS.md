@@ -45,8 +45,8 @@ This document catalogs feature requirements and their implementation status, key
 | REQ-N1 | User accounts + cloud sync | — | ✅ |
 | REQ-N2 | Ikigai mapper (4-circle diagram) | — | ✅ |
 | REQ-N3 | Letter to future self (timed, sealed entry) | — | ✅ |
-| REQ-N4 | Meditation / breathing timer | — | 💤 |
-| REQ-N5 | Weekly digest (email or in-app) | — | 💤 |
+| REQ-N4 | Meditation / breathing timer | — | ✅ |
+| REQ-N5 | Weekly digest (email or in-app) | — | ✅ |
 | REQ-N8 | AI-extracted recurring themes (upgrades REQ-P4's heuristic pills) | — | ✅ |
 
 - **REQ-N1**: implemented as Clerk (auth) + Neon Postgres (cloud storage of
@@ -61,6 +61,13 @@ This document catalogs feature requirements and their implementation status, key
 - **REQ-N8**: `/api/themes` (Claude structured output) adds an "Uncover
   deeper themes" button on `/insights`; falls back to the REQ-P4 heuristic
   category pills if AI is unavailable or there are fewer than 3 entries.
+- **REQ-N4**: `/meditation` — box-breathing timer, no AI, no auth, no cloud
+  sync. Purely client-side.
+- **REQ-N5**: shipped as in-app only (no email). `weeklyDigest()` in
+  `lib/insights.ts` derives entry count + top category over the trailing 7
+  days, pure/testable like the rest of REQ-P4's analytics. Rendered as a
+  compact card on the home dashboard and a fuller card at the top of
+  `/insights`.
 
 ## Navigation (REQ-NAV)
 

@@ -10,6 +10,7 @@ import {
   patternObservation,
   suggestedCategories,
   themeCounts,
+  weeklyDigest,
   WEEKDAY_LABELS,
 } from "@/lib/insights";
 import type { JournalEntry } from "@/lib/types";
@@ -77,6 +78,7 @@ export default function InsightsPage() {
   const maxDay = Math.max(...days, 1);
   const observation = patternObservation(entries);
   const suggestions = suggestedCategories(entries);
+  const digest = weeklyDigest(entries);
 
   // POST to /api/themes and update AI theme state (REQ-N8).
   async function handleUncoverThemes() {
@@ -117,6 +119,17 @@ export default function InsightsPage() {
         <p className="label">Insights</p>
         <h1 className="heading text-3xl">What your writing reveals</h1>
       </div>
+
+      {/* Weekly digest (REQ-N5) */}
+      {digest.entryCount > 0 && (
+        <section className="panel-accent space-y-1 rounded-r-lg p-5">
+          <p className="label">This week</p>
+          <p className="font-serif text-lg text-sage-dark">
+            {digest.entryCount} {digest.entryCount === 1 ? "entry" : "entries"}
+            {digest.topCategory && ` · mostly reflecting on ${digest.topCategory}`}
+          </p>
+        </section>
+      )}
 
       {/* Recurring themes (REQ-I1 / REQ-N8) */}
       <section className="space-y-3">

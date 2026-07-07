@@ -40,6 +40,21 @@ export const PROMPTS: Prompt[] = [
   },
 ];
 
+export const AFFIRMATIONS: string[] = [
+  "You do not have to have it all figured out to be worthy of your own attention.",
+  "Small, honest moments add up to a life.",
+  "Rest is not a departure from the path — it is part of it.",
+  "You are allowed to change your mind about who you're becoming.",
+  "Noticing is itself a kind of progress.",
+  "You don't need permission to want what you want.",
+  "Some days the only task is to stay soft.",
+  "Whatever you're carrying, you don't have to carry it alone.",
+  "The quiet in-between moments are where you meet yourself.",
+  "You are not behind. There is no schedule but your own.",
+  "Being gentle with yourself is not the same as giving up.",
+  "You get to define what a good day looks like.",
+];
+
 export const VALUES: ValueDef[] = [
   { id: "creativity", name: "Creativity", description: "Making something new from what is" },
   { id: "freedom", name: "Freedom", description: "Room to choose your own way" },
