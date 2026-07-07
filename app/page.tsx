@@ -34,6 +34,11 @@ const FEATURES = [
       "Discover what truly matters to you with a guided values survey and a personal profile.",
   },
   {
+    title: "Seal a Letter",
+    blurb:
+      "Write to your future self and seal it until a date you choose.",
+  },
+  {
     title: "Find Your Ikigai",
     blurb:
       "Explore the intersection of what you love, what you're good at, what the world needs, and what you can be paid for.",
@@ -81,7 +86,7 @@ function LandingView() {
       {/* Features */}
       <section className="space-y-4">
         <p className="label text-center">What you&apos;ll find here</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
           {FEATURES.map((f) => (
             <div key={f.title} className="card p-5">
               <p className="heading text-lg">{f.title}</p>
@@ -139,7 +144,7 @@ function DashboardView() {
       </section>
 
       {/* Pillars */}
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
         {PILLARS.map((p) => (
           <Link key={p.href} href={p.href} className="card p-4 hover:border-black/20">
             <p className="heading text-lg">{p.title}</p>
