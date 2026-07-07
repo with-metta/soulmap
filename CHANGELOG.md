@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Accounts + cloud sync** (REQ-N1): Clerk authentication gates content
+  creation (journal, values); signed-in users' entries and values profiles
+  cloud-sync to Neon Postgres (`lib/db-server.ts`) via `/api/entries` and
+  `/api/user-values`, in addition to the local IndexedDB copy. Previously
+  shipped without a changelog entry — documented here for traceability.
 - **Letter to your future self** (REQ-N3): `/letter` lets a signed-in user
   write a `LetterEntry` (body + unlock date) that stays sealed until
   `unlockAt`. Saved locally to IndexedDB (`letters` store, DB v3) and

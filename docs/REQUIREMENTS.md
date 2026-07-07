@@ -42,11 +42,25 @@ This document catalogs feature requirements and their implementation status, key
 
 | ID | Requirement | Version | Status |
 |----|-------------|---------|--------|
-| REQ-N1 | User accounts + cloud sync (Supabase) | — | 💤 |
-| REQ-N2 | Ikigai mapper (4-circle diagram) | — | 💤 |
-| REQ-N3 | Letter to future self (timed, sealed entry) | — | 💤 |
+| REQ-N1 | User accounts + cloud sync | — | ✅ |
+| REQ-N2 | Ikigai mapper (4-circle diagram) | — | ✅ |
+| REQ-N3 | Letter to future self (timed, sealed entry) | — | ✅ |
 | REQ-N4 | Meditation / breathing timer | — | 💤 |
 | REQ-N5 | Weekly digest (email or in-app) | — | 💤 |
+| REQ-N8 | AI-extracted recurring themes (upgrades REQ-P4's heuristic pills) | — | ✅ |
+
+- **REQ-N1**: implemented as Clerk (auth) + Neon Postgres (cloud storage of
+  entries/values), not Supabase as originally scoped. IndexedDB remains the
+  local-first cache (ADR-002); Postgres is the durable per-account store.
+- **REQ-N2**: `/ikigai` — 2×2 textarea grid (love / good at / world needs /
+  paid for), Claude synthesis, IndexedDB persistence. Linked from nav and
+  home page.
+- **REQ-N3**: `/letter` — compose a letter with a future unlock date; sealed
+  until then. Local-first (IndexedDB) + cloud sync (Postgres via
+  `/api/letters`), same pattern as journal entries.
+- **REQ-N8**: `/api/themes` (Claude structured output) adds an "Uncover
+  deeper themes" button on `/insights`; falls back to the REQ-P4 heuristic
+  category pills if AI is unavailable or there are fewer than 3 entries.
 
 ## Navigation (REQ-NAV)
 
