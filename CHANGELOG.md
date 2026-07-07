@@ -22,6 +22,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   page is reachable from the UI. Added `/api/ikigai(.*)` to the Clerk route
   matcher in `proxy.ts` so the Anthropic-backed endpoint requires
   authentication like `/api/reflect` and `/api/values`.
+- **Fix Insights ignoring cloud-synced entries (REQ-N8)**: `/insights` read
+  only local IndexedDB via `getEntries()`, so a signed-in user whose entries
+  live in Neon (written on another device, or after local storage was
+  cleared) saw a degraded or empty page and never got the "Uncover deeper
+  themes" button. `app/insights/page.tsx` now mirrors the home page's
+  `DashboardView`: signed-in users fetch `/api/entries`, falling back to
+  local `getEntries()` on failure; signed-out users are unchanged.
 
 ## [0.1.0] — 2026-06-29
 
