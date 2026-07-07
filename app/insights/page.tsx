@@ -41,7 +41,10 @@ export default function InsightsPage() {
     if (isSignedIn) {
       fetch("/api/entries")
         .then((r) => r.json())
-        .then((d) => setEntries(d.entries as JournalEntry[]))
+        .then((d) => {
+          if (!Array.isArray(d.entries)) throw new Error("Unexpected response");
+          setEntries(d.entries as JournalEntry[]);
+        })
         .catch(() => getEntries().then(setEntries).catch(() => setEntries([])));
     } else {
       getEntries().then(setEntries).catch(() => setEntries([]));

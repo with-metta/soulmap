@@ -1,3 +1,4 @@
+import { describe, expect, it } from "vitest";
 import { POST } from "@/app/api/themes/route";
 
 // This path is rejected by RequestSchema before getClient() is ever called,
