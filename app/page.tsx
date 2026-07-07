@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useUser, SignInButton } from "@clerk/nextjs";
-import { PROMPTS } from "@/lib/content";
-import { getRecentEntries } from "@/lib/db";
+import { AFFIRMATIONS, PROMPTS } from "@/lib/content";
+import { getEntries } from "@/lib/db";
+import { weeklyDigest } from "@/lib/insights";
 import type { JournalEntry } from "@/lib/types";
 
 // Deterministic "prompt of the day" so it's stable across a calendar day.
@@ -12,6 +13,13 @@ function dailyPrompt() {
   const start = new Date(new Date().getFullYear(), 0, 0).getTime();
   const dayOfYear = Math.floor((Date.now() - start) / 86_400_000);
   return PROMPTS[dayOfYear % PROMPTS.length];
+}
+
+// Deterministic "thought for the day", same rotation scheme as dailyPrompt.
+function dailyAffirmation() {
+  const start = new Date(new Date().getFullYear(), 0, 0).getTime();
+  const dayOfYear = Math.floor((Date.now() - start) / 86_400_000);
+  return AFFIRMATIONS[dayOfYear % AFFIRMATIONS.length];
 }
 
 const PILLARS = [
@@ -78,6 +86,14 @@ function LandingView() {
         </div>
       </section>
 
+      {/* Thought for today */}
+      <section className="card mx-auto max-w-lg p-5 text-center">
+        <p className="label">Thought for today</p>
+        <p className="heading mt-2 text-lg italic text-ink-soft">
+          &ldquo;{dailyAffirmation()}&rdquo;
+        </p>
+      </section>
+
       {/* YouTube embed */}
       <section className="relative aspect-video w-full overflow-hidden rounded-xl">
         <iframe
@@ -117,24 +133,35 @@ function LandingView() {
 function DashboardView() {
   const prompt = dailyPrompt();
   const { isSignedIn } = useUser();
-  const [recent, setRecent] = useState<JournalEntry[] | null>(null);
+  const [entries, setEntries] = useState<JournalEntry[] | null>(null);
 
+  // Full entry list (not just recent) so the weekly digest (REQ-N5) can scan
+  // the trailing 7 days, not only the last 3 saved entries.
   useEffect(() => {
     if (isSignedIn) {
       fetch("/api/entries")
         .then((r) => r.json())
-        .then((d) => setRecent((d.entries as JournalEntry[]).slice(0, 3)))
-        .catch(() => getRecentEntries(3).then(setRecent));
+        .then((d) => {
+          if (!Array.isArray(d.entries)) throw new Error("Unexpected response");
+          setEntries(d.entries as JournalEntry[]);
+        })
+        .catch(() => getEntries().then(setEntries).catch(() => setEntries([])));
     } else {
-      getRecentEntries(3).then(setRecent).catch(() => setRecent([]));
+      getEntries().then(setEntries).catch(() => setEntries([]));
     }
   }, [isSignedIn]);
+
+  const recent = entries?.slice(0, 3) ?? null;
+  const digest = entries ? weeklyDigest(entries) : null;
 
   return (
     <div className="space-y-10">
       <div>
         <p className="label">Today</p>
         <h1 className="heading text-3xl">Welcome back</h1>
+        <p className="mt-2 font-serif text-lg italic text-ink-soft">
+          &ldquo;{dailyAffirmation()}&rdquo;
+        </p>
       </div>
 
       {/* Daily prompt */}
@@ -148,6 +175,17 @@ function DashboardView() {
           Reflect on this
         </Link>
       </section>
+
+      {/* Weekly digest (REQ-N5) */}
+      {digest && digest.entryCount > 0 && (
+        <section className="card p-4">
+          <p className="label">This week</p>
+          <p className="mt-1 text-ink-soft">
+            {digest.entryCount} {digest.entryCount === 1 ? "entry" : "entries"}
+            {digest.topCategory && ` · mostly ${digest.topCategory}`}
+          </p>
+        </section>
+      )}
 
       {/* Pillars */}
       <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">

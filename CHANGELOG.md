@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Weekly digest** (REQ-N5): `weeklyDigest()` in `lib/insights.ts` summarizes
+  entry count and top prompt category over the trailing 7 days. Shipped
+  in-app only (no email delivery). Shown as a compact "This week" card on the
+  home dashboard and a fuller version at the top of `/insights`.
+- **Daily affirmation**: home page now shows a deterministic "thought for the
+  day" (same rotation scheme as the existing daily prompt) — under "Welcome
+  back" for signed-in users, and as its own card on the signed-out landing
+  view.
 - **Fix journal entries not loading (REQ-P2)**: `/journal` had no logic at
   all to load or display an existing entry — CHANGELOG had documented
   "pre-fills on return to the same day" since v0.1.0, but it was never

@@ -47,6 +47,19 @@ export function suggestedCategories(
     .map(([category]) => category);
 }
 
+export interface WeeklyDigest {
+  entryCount: number;
+  topCategory: PromptCategory | null;
+}
+
+/** Summary of the trailing 7 days, for a "this week" digest (REQ-N5). */
+export function weeklyDigest(entries: JournalEntry[]): WeeklyDigest {
+  const weekAgo = Date.now() - 7 * 86_400_000;
+  const thisWeek = entries.filter((e) => e.createdAt >= weekAgo);
+  const top = themeCounts(thisWeek)[0];
+  return { entryCount: thisWeek.length, topCategory: top?.category ?? null };
+}
+
 /**
  * One honest, non-prescriptive observation about writing habits (REQ-I3).
  * Returns null when there isn't enough data to say anything truthful.
