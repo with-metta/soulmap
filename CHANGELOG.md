@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Letter to your future self** (REQ-N3): `/letter` lets a signed-in user
+  write a `LetterEntry` (body + unlock date) that stays sealed until
+  `unlockAt`. Saved locally to IndexedDB (`letters` store, DB v3) and
+  cloud-synced via `/api/letters` (`GET`/`POST`, Clerk-protected). Sealed
+  letters hide their body until the unlock date passes.
+
 ## [0.1.0] — 2026-06-29
 
 - **Daily prompt** (`/journal`): random prompt from a library, text input for

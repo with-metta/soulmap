@@ -69,3 +69,11 @@ export interface IkigaiEntry {
   paidFor: string;
   analysis: string;
 }
+
+/** A sealed letter, hidden until its unlock date. */
+export interface LetterEntry {
+  id: string;
+  createdAt: number;
+  unlockAt: number; // epoch-ms; letter is sealed while Date.now() < unlockAt
+  body: string;
+}

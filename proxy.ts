@@ -6,6 +6,7 @@ const isProtectedRoute = createRouteMatcher([
   "/api/values(.*)",
   "/api/entries(.*)",
   "/api/user-values(.*)",
+  "/api/letters(.*)",
 ]);
 
 export const proxy = clerkMiddleware(async (auth, req) => {
