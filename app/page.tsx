@@ -18,6 +18,7 @@ const PILLARS = [
   { href: "/journal", title: "Journal", blurb: "Quiet reflection with a gentle mirror." },
   { href: "/values", title: "Values", blurb: "Discover what truly matters to you." },
   { href: "/letter", title: "Letter", blurb: "Seal a letter to your future self." },
+  { href: "/meditation", title: "Meditation", blurb: "A guided breath and a quiet timer." },
   { href: "/ikigai", title: "Ikigai", blurb: "Find your reason for being." },
   { href: "/insights", title: "Insights", blurb: "Patterns and themes from your writing." },
 ];
@@ -37,6 +38,11 @@ const FEATURES = [
     title: "Seal a Letter",
     blurb:
       "Write to your future self and seal it until a date you choose.",
+  },
+  {
+    title: "Breathe and Settle",
+    blurb:
+      "A simple box-breathing timer to help you pause and come back to yourself.",
   },
   {
     title: "Find Your Ikigai",
@@ -86,7 +92,7 @@ function LandingView() {
       {/* Features */}
       <section className="space-y-4">
         <p className="label text-center">What you&apos;ll find here</p>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
           {FEATURES.map((f) => (
             <div key={f.title} className="card p-5">
               <p className="heading text-lg">{f.title}</p>
@@ -144,7 +150,7 @@ function DashboardView() {
       </section>
 
       {/* Pillars */}
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3 lg:grid-cols-6">
         {PILLARS.map((p) => (
           <Link key={p.href} href={p.href} className="card p-4 hover:border-black/20">
             <p className="heading text-lg">{p.title}</p>

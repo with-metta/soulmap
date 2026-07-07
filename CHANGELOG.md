@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Meditation / breathing timer** (REQ-N4): `/meditation` offers preset
+  session lengths (1/3/5/10 min), a box-breathing circle (inhale/hold/exhale/
+  hold, 4s each) driven off a single interval so the countdown and animation
+  never drift, and Start/Pause/Reset controls with a proper effect cleanup so
+  a dangling interval can't outlive a pause or navigation. Stateless utility —
+  no AI, no auth gate, no cloud sync. Completed sessions save locally as
+  `MeditationSession` (`sessions` store, IndexedDB v4) and a running count is
+  shown on the page. Linked from `components/Nav.tsx` and the home page's
+  pillars/features lists (grid bumped to 6 columns).
 - **Accounts + cloud sync** (REQ-N1): Clerk authentication gates content
   creation (journal, values); signed-in users' entries and values profiles
   cloud-sync to Neon Postgres (`lib/db-server.ts`) via `/api/entries` and
@@ -28,7 +37,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   cleared) saw a degraded or empty page and never got the "Uncover deeper
   themes" button. `app/insights/page.tsx` now mirrors the home page's
   `DashboardView`: signed-in users fetch `/api/entries`, falling back to
-  local `getEntries()` on failure; signed-out users are unchanged.
+  local `getEntries()` on failure; signed-out users are unchanged. The cloud
+  fetch now also verifies the response shape before using it, so a non-200
+  response with a JSON body (e.g. a stale-session 401) falls back to local
+  entries instead of crashing the page.
+- **Test coverage for `/api/themes`** (REQ-N8): Added Vitest as the project's
+  test runner (`vitest.config.ts`, `npm run test`) and mocked unit tests
+  covering the happy path and the < 3 entries validation error. Also removed
+  the two remaining `any` types in `app/api/themes/route.ts` in favor of a
+  small hand-written type for the model's `parsed_output` shape. Scoped
+  Vitest's global types to the test files themselves (explicit `vitest`
+  imports) instead of the project-wide `tsconfig.json`, to avoid
+  inadvertently narrowing automatic `@types/*` inclusion project-wide.
 
 ## [0.1.0] — 2026-06-29
 
