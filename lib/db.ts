@@ -158,7 +158,7 @@ export async function getMeditationSessions(): Promise<MeditationSession[]> {
 // ── Streak (REQ-NAV1) ──────────────────────────────────────────────────────
 
 /** Local-date key (YYYY-MM-DD) for grouping entries by calendar day. */
-function dayKey(ts: number): string {
+export function dayKey(ts: number): string {
   const d = new Date(ts);
   return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 }

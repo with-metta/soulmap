@@ -1,11 +1,11 @@
 "use client";
 
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useUser, SignInButton } from "@clerk/nextjs";
 import { MOODS, PROMPTS } from "@/lib/content";
-import type { AIReflection, MoodId, PromptCategory } from "@/lib/types";
-import { newId, saveEntry } from "@/lib/db";
+import type { AIReflection, JournalEntry, MoodId, PromptCategory } from "@/lib/types";
+import { dayKey, getEntries, newId, saveEntry } from "@/lib/db";
 import { Button } from "@/components/Button";
 
 function JournalScreen() {
@@ -25,9 +25,42 @@ function JournalScreen() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const [prefilling, setPrefilling] = useState(true);
 
   const prompt = PROMPTS[promptIndex];
   const wordCount = body.trim() ? body.trim().split(/\s+/).length : 0;
+
+  // Pre-fill today's entry, if one already exists, so returning to the
+  // journal later the same day shows what you wrote instead of a blank
+  // page. Cloud-first for signed-in users (mirrors the home page's
+  // DashboardView), falling back to local IndexedDB.
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const load: Promise<JournalEntry[]> = isSignedIn
+      ? fetch("/api/entries")
+          .then((r) => r.json())
+          .then((d) => {
+            if (!Array.isArray(d.entries)) throw new Error("Unexpected response");
+            return d.entries as JournalEntry[];
+          })
+          .catch(() => getEntries())
+      : getEntries();
+
+    load
+      .then((entries) => {
+        const today = entries.find((e) => dayKey(e.createdAt) === dayKey(Date.now()));
+        if (!today) return;
+        setBody(today.body);
+        setMood(today.mood);
+        if (today.reflection) setReflection(today.reflection);
+        const idx = PROMPTS.findIndex((p) => p.category === today.promptCategory);
+        if (idx >= 0) setPromptIndex(idx);
+        setSaved(true);
+      })
+      .catch(() => {})
+      .finally(() => setPrefilling(false));
+  }, [isLoaded, isSignedIn]);
 
   function selectPrompt(i: number) {
     setPromptIndex(i);
@@ -139,6 +172,10 @@ function JournalScreen() {
               Sign in to continue
             </button>
           </SignInButton>
+        </section>
+      ) : !isLoaded || prefilling ? (
+        <section className="flex items-center justify-center py-8">
+          <p className="text-ink-soft">Loading your journal…</p>
         </section>
       ) : (
         <section className="space-y-2">
