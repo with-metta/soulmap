@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+- **Fix journal entries not loading (REQ-P2)**: `/journal` had no logic at
+  all to load or display an existing entry — CHANGELOG had documented
+  "pre-fills on return to the same day" since v0.1.0, but it was never
+  actually implemented (confirmed against the original scaffold commit).
+  Returning to the journal always showed a blank page even if you'd already
+  written today. Now fetches today's entry on mount (cloud-first for
+  signed-in users via `/api/entries`, falling back to local IndexedDB) and
+  pre-fills the body, mood, prompt, and reflection if one exists. Also
+  hardened `/api/entries` to return a clean 502 instead of an unhandled
+  crash if the cloud database is unreachable (e.g. `DATABASE_URL` unset).
 - **Meditation / breathing timer** (REQ-N4): `/meditation` offers preset
   session lengths (1/3/5/10 min), a box-breathing circle (inhale/hold/exhale/
   hold, 4s each) driven off a single interval so the countdown and animation
