@@ -12,6 +12,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `unlockAt`. Saved locally to IndexedDB (`letters` store, DB v3) and
   cloud-synced via `/api/letters` (`GET`/`POST`, Clerk-protected). Sealed
   letters hide their body until the unlock date passes.
+- **Fix Ikigai unreachable + unprotected (REQ-N2)**: Added `/ikigai` to
+  `components/Nav.tsx` and to the home page's pillars/features lists, so the
+  page is reachable from the UI. Added `/api/ikigai(.*)` to the Clerk route
+  matcher in `proxy.ts` so the Anthropic-backed endpoint requires
+  authentication like `/api/reflect` and `/api/values`.
 
 ## [0.1.0] — 2026-06-29
 
