@@ -1,5 +1,11 @@
 import { openDB, type DBSchema, type IDBPDatabase } from "idb";
-import type { JournalEntry, IkigaiEntry, LetterEntry, ValuesProfile } from "./types";
+import type {
+  JournalEntry,
+  IkigaiEntry,
+  LetterEntry,
+  MeditationSession,
+  ValuesProfile,
+} from "./types";
 
 // Local-first persistence (ADR-002). All reads/writes go through this module
 // so the UI never touches IndexedDB directly — a future Supabase backend can
@@ -26,10 +32,15 @@ interface SoulMapDB extends DBSchema {
     value: LetterEntry;
     indexes: { byCreatedAt: number };
   };
+  sessions: {
+    key: string;
+    value: MeditationSession;
+    indexes: { byCreatedAt: number };
+  };
 }
 
 const DB_NAME = "soulmap";
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 let dbPromise: Promise<IDBPDatabase<SoulMapDB>> | null = null;
 
@@ -53,6 +64,10 @@ function getDB(): Promise<IDBPDatabase<SoulMapDB>> {
         if (oldVersion < 3) {
           const letters = db.createObjectStore("letters", { keyPath: "id" });
           letters.createIndex("byCreatedAt", "createdAt");
+        }
+        if (oldVersion < 4) {
+          const sessions = db.createObjectStore("sessions", { keyPath: "id" });
+          sessions.createIndex("byCreatedAt", "createdAt");
         }
       },
     });
@@ -123,6 +138,20 @@ export async function saveLetter(entry: LetterEntry): Promise<void> {
 export async function getLetters(): Promise<LetterEntry[]> {
   const db = await getDB();
   const all = await db.getAllFromIndex("letters", "byCreatedAt");
+  return all.reverse();
+}
+
+// ── Meditation sessions ──────────────────────────────────────────────────────
+
+export async function saveMeditationSession(entry: MeditationSession): Promise<void> {
+  const db = await getDB();
+  await db.put("sessions", entry);
+}
+
+/** All meditation sessions, newest first. */
+export async function getMeditationSessions(): Promise<MeditationSession[]> {
+  const db = await getDB();
+  const all = await db.getAllFromIndex("sessions", "byCreatedAt");
   return all.reverse();
 }
 
