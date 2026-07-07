@@ -22,6 +22,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   page is reachable from the UI. Added `/api/ikigai(.*)` to the Clerk route
   matcher in `proxy.ts` so the Anthropic-backed endpoint requires
   authentication like `/api/reflect` and `/api/values`.
+- **Test coverage for `/api/themes`** (REQ-N8): Added Vitest as the project's
+  test runner (`vitest.config.ts`, `npm run test`) and mocked unit tests
+  covering the happy path and the < 3 entries validation error. Also removed
+  the two remaining `any` types in `app/api/themes/route.ts` in favor of a
+  small hand-written type for the model's `parsed_output` shape.
 
 ## [0.1.0] — 2026-06-29
 

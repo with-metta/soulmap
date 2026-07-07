@@ -27,6 +27,17 @@ const ThemesSchema = z.object({
     .max(6),
 });
 
+// Shape of response.parsed_output — hand-written since the SDK types the
+// field loosely; kept in sync with ThemesSchema above but declared with
+// `unknown` members so normalization below still validates/narrows them.
+interface ParsedThemeItem {
+  label?: unknown;
+  count?: unknown;
+}
+interface ParsedThemesOutput {
+  themes?: unknown;
+}
+
 export async function POST(req: Request) {
   let parsed;
   try {
@@ -82,7 +93,8 @@ export async function POST(req: Request) {
     // but normalize and return a stable shape so the frontend doesn't depend on
     // provider-specific wrappers. Also avoid returning raw journal text or
     // model internals here.
-    const out = (response as any).parsed_output;
+    const out = (response as { parsed_output?: ParsedThemesOutput })
+      .parsed_output;
     if (!out || !Array.isArray(out.themes)) {
       return NextResponse.json(
         { error: "The themes could not be extracted. Please try again." },
@@ -91,7 +103,7 @@ export async function POST(req: Request) {
     }
 
     // Normalize themes: ensure label is string and count is integer.
-    const themes = out.themes.map((t: any) => ({
+    const themes = (out.themes as ParsedThemeItem[]).map((t) => ({
       label: String(t.label ?? ""),
       count: Number.isFinite(Number(t.count)) ? Math.trunc(Number(t.count)) : 0,
     }));
